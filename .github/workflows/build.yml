@@ -1,9 +1,6 @@
 name: Build Android APK
 
-on:
-  push:
-    branches:
-      - main
+on: push
 
 jobs:
   build:
@@ -13,22 +10,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Install Buildozer dependencies
+      - name: Install required system packages
         run: |
-          sudo apt update
-          sudo apt install -y python3 python3-pip python3-setuptools git zip unzip
-          pip install buildozer cython
+          sudo apt-get update
+          sudo apt-get install -y zip unzip libstdc++6 python3-pip
+
+      - name: Install Android SDK + build-tools
+        run: |
+          sudo mkdir -p /usr/lib/android-sdk
+          sudo bash -c "yes | sdkmanager --licenses"
+          sudo sdkmanager --install \
+            'platform-tools' \
+            'platforms;android-33' \
+            'build-tools;33.0.2'
+
+      - name: Install Buildozer
+        run: pip3 install buildozer cython
 
       - name: Build APK
         run: |
           cd android
-          buildozer -v android debug
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
