@@ -10,30 +10,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install required system packages
+      - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip libstdc++6 python3-pip
+          sudo apt-get install -y python3-pip zip unzip
 
-      - name: Install Android SDK + build-tools
+      - name: Install Android SDK
         run: |
-          sudo mkdir -p /usr/lib/android-sdk
-          sudo bash -c "yes | sdkmanager --licenses"
-          sudo sdkmanager --install \
-            'platform-tools' \
-            'platforms;android-33' \
-            'build-tools;33.0.2'
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip
+          unzip commandlinetools-linux-*.zip -d android-sdk
+          mkdir -p $HOME/.android
+          echo "### User Sources for Android SDK Manager" > $HOME/.android/repositories.cfg
+          yes | android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
       - name: Install Buildozer
-        run: pip3 install buildozer cython
+        run: |
+          pip3 install cython buildozer
 
       - name: Build APK
         run: |
           cd android
-          buildozer android debug
+          ANDROIDSDK=$GITHUB_WORKSPACE/android-sdk buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: SpendFlow-APK
-          path: android/bin/*.apk
+          path: android/bin/*.apk w
