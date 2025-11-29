@@ -29,8 +29,9 @@ jobs:
           cd android
           buildozer android debug
 
-      - name: Upload APK artifact
-      - uses: actions/upload-artifact@v4
-        with:
-          name: SpendFlow-APK
-          path: android/bin/*.apk
+      - name: Upload APK
+  uses: actions/upload-artifact@v4
+  with:
+    name: SpendFlow
+    path: |
+      android/app/build/outputs/**/*.apk
