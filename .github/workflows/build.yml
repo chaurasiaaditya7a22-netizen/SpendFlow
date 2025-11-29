@@ -1,4 +1,4 @@
-name: Build SpendFlow APK
+name: Build Android APK
 
 on:
   push:
@@ -9,36 +9,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install Java JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: "11"
-        distribution: "temurin"
+      - name: Install Python dependencies
+        run: |
+          pip install buildozer cython
 
-    - name: Install Python-for-Android
-      run: pip install python-for-android
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
 
-    - name: Build APK
-      run: |
-        p4a apk \
-        --private spendflow.py \
-        --package com.adityaspendflow \
-        --name "Spend Flow" \
-        --version 1.0 \
-        --bootstrap=sdl2 \
-        --requirements=python3,kivy \
-        --orientation=portrait
+      - name: Build APK
+        run: |
+          cd android
+          buildozer android debug
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: SpendFlow-APK
-        path: *.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: SpendFlow-APK
+          path: android/bin/*.apk
